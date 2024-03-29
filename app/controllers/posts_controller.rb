@@ -1,7 +1,8 @@
+# frozen_string_literal: true
 class PostsController < ApplicationController
-  before_action :set_post, only: %i[ show edit update destroy ]
-  before_action :authenticate_user!, except: %i[ index show ]
-  before_action :is_user?, only: %i[index show]
+  before_action :set_post, only: %i[show edit update destroy]
+  before_action :authenticate_user!, except: %i[index show]
+  before_action :ensure_admin, only: %i[new create edit update destroy]
 
   # GET /posts or /posts.json
   def index
@@ -24,7 +25,8 @@ class PostsController < ApplicationController
   # POST /posts or /posts.json
   def create
     @post = Post.new(post_params)
-
+    @post.user = current_user
+    # @post.images.attach(params[:images])
     respond_to do |format|
       if @post.save
         format.html { redirect_to post_url(@post), notice: "Post was successfully created." }
@@ -60,17 +62,23 @@ class PostsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_post
-      @post = Post.find(params[:id])
-    end
 
-    # Only allow a list of trusted parameters through.
-    def post_params
-      params.require(:post).permit(:title, :body)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_post
+    @post = Post.find(params[:id])
+  end
 
-    def is_user?
-      user_signed_in? == false || current_user.role == 'user'
+  # Only allow a list of trusted parameters through.
+  def post_params
+    params.require(:post).permit(:title, :body, :user_id)
+  end
+
+  def is_user?
+    user_signed_in? == false || current_user.role == 'user'
+  end
+  def ensure_admin
+    if current_user.role != 'admin'
+      raise ActionController::RoutingError, 'Not Found'
     end
+  end
 end

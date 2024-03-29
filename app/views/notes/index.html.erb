@@ -2,6 +2,12 @@
 
 <h1>Notes</h1>
 
+<% if user_signed_in? %>
+  <% if current_user.role == 'admin' %>
+  <p><%= link_to "new note", new_note_path %></p>
+  <% end %>
+<% end %>
+
 <div id="notes">
   <% @notes.each do |note| %>
     <%= render note %>

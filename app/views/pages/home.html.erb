@@ -9,10 +9,16 @@
 <p><a href="https://mariaheppes.itch.io/">Interactive text on itch.io.</a></p>
 <p><a href="https://www.brinkliterary.com/">Brink Literary, a journal of hybrid writing.</a></p>
 <br>
-<h2>Recent Posts</h2>
-<% @recent_posts.reverse_each do |post| %>
-    <li>
-        <%= link_to post.title, post %> | <%= post.created_at.to_date%>
-    </li>
-<% end %>
-<p>I can be reached at birdbyrocket at gmail dot com.</p>
+<div>
+    <h2>Recent Posts</h2>
+    <ul>
+    <% @recent_posts.reverse_each do |post| %>
+        <li>
+            <%= link_to post.title, post %> | <%= post.created_at.to_date%>
+        </li>
+    <% end %>
+    </ul>
+</div>
+<footer>
+    <p>I can be reached at birdbyrocket at gmail dot com.</p>
+</footer>

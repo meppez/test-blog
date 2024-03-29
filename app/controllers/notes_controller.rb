@@ -1,7 +1,8 @@
 class NotesController < ApplicationController
   before_action :set_note, only: %i[ show edit update destroy ]
   before_action :authenticate_user!, except: %i[ index show ]
-  before_action :is_user?, only: %i[index show]
+  # before_action :is_user?, only: %i[index show]
+  before_action :ensure_admin, only: %i[new create edit update destroy]
 
   # GET /notes or /notes.json
   def index
@@ -23,15 +24,22 @@ class NotesController < ApplicationController
 
   # POST /notes or /notes.json
   def create
-    @note = Note.new(note_params)
-
-    respond_to do |format|
-      if @note.save
-        format.html { redirect_to note_url(@note), notice: "Note was successfully created." }
-        format.json { render :show, status: :created, location: @note }
-      else
-        format.html { render :new, status: :unprocessable_entity }
-        format.json { render json: @note.errors, status: :unprocessable_entity }
+    if current_user.role == 'admin'
+      @note = Note.new(note_params)
+      @note.user_id = current_user.id
+      @note.images.attach(params[:images])
+      respond_to do |format|
+        if @note.save
+          format.html { redirect_to post_url(@note), notice: "Note was successfully created." }
+          format.json { render :show, status: :created, location: @note }
+        else
+          format.html { render :new, status: :unprocessable_entity }
+          format.json { render json: @note.errors, status: :unprocessable_entity }
+        end
+      end
+    else
+      respond_to do |format|
+        format.html { redirect_to notes_path, alert: "You do not have access to create a note."}
       end
     end
   end
@@ -68,10 +76,16 @@ class NotesController < ApplicationController
 
   # Only allow a list of trusted parameters through.
   def note_params
-    params.require(:note).permit(:title, :body)
+    params.require(:note).permit(:title, :body, :user_id)
   end
 
   def is_user?
     user_signed_in? == false || current_user.role == 'user'
+  end
+
+  def ensure_admin
+    if current_user.role != 'admin'
+      raise ActionController::RoutingError, 'Not Found'
+    end
   end
 end

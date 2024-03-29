@@ -2,6 +2,12 @@
 
 <h1>Posts</h1>
 
+<% if user_signed_in? %>
+  <% if current_user.role == 'admin' %>
+  <p><%= link_to "new post", new_post_path %></p>
+  <% end %>
+<% end %>
+
 <div id="posts">
   <% @posts.each do |post| %>
     <%= render post %>
@@ -10,5 +16,3 @@
     </p>
   <% end %>
 </div>
-
-<%= link_to "new post", new_post_path %>
